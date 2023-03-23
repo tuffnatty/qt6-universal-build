@@ -1,0 +1,92 @@
+env:
+  PKG_PATH: /opt/local/var/macports/software
+name: MacOSX 11+ universal release build
+on:
+  workflow_dispatch:
+    inputs:
+  schedule:
+    - cron: '0 3 * * 1' # run at 3 AM UTC every Monday
+  repository_dispatch:
+    types: [release]
+jobs:
+  build:
+    runs-on: macos-11
+    steps:
+    - name: Install MacPorts
+      run: |
+        curl -LO https://raw.githubusercontent.com/tuffnatty/macports-ci/hash-r-after-homebrew-removal/macports-ci
+        source ./macports-ci install --remove-brew
+    - name: Restore MacPorts packages cache
+      uses: actions/cache/restore@v3
+      with:
+        path: ${{ env.PKG_PATH }}
+        key: macports-pkgs-${{ matrix.variant }}-${{ github.sha }}
+        restore-keys: macports-pkgs-${{ matrix.variant }}-
+    - name: Restore ccache
+      uses: actions/cache/restore@v3
+      with:
+        path: ~/.macports-ci-ccache
+        key: ccache-macports-${{ matrix.variant }}-${{ github.sha }}
+        restore-keys: ccache-macports-${{ matrix.variant }}-
+    - name: Configure ccache
+      run: |
+        source ./macports-ci ccache
+    - name: Install patched Portfile
+      run: |
+        # https://github.com/macports/macports-ports/pull/16735
+        mkdir -p macports/aqua
+        cd macports
+        cp -rp /opt/local/var/macports/sources/*/macports/release/tarballs/ports/aqua/qt6 \
+            aqua/
+        curl -L https://github.com/macports/macports-ports/commit/62f0020772f9f68664e73e03b4355262b6024664.diff \
+            | patch -p1
+        curl -L https://github.com/macports/macports-ports/commit/4b90c16bb66f0c43a2a57f342bc959f3e8422c00.diff \
+            | patch -p1
+
+        # graphite2
+        curl -L https://github.com/tuffnatty/macports-ports/commit/7d59ff0189e3591c72ea65292a194c002730f5e5.diff \
+            | patch -p1
+
+        cd ..
+        source ./macports-ci localports macports
+    - name: Install graphite2 deps
+      run: |
+        sudo port -Nkv install cmake py310-fonttools
+    - name: Install graphite2
+      run: |
+        sudo port -Nkv install graphite2 +universal || true
+    - name: Save MacPorts packages cache
+      uses: actions/cache/save@v3
+      with:
+        path: ${{ env.PKG_PATH }}
+        key: macports-pkgs-${{ matrix.variant }}-${{ github.sha }}-1
+    - name: Save ccache
+      uses: actions/cache/save@v3
+      with:
+        path: ~/.macports-ci-ccache
+        key: ccache-macports-${{ matrix.variant }}-${{ github.sha }}-1
+    - name: Install Qt
+      run: |
+        for portname in \
+            qt6-qtbase \
+            qt6-qtscript \
+            qt6-qttools \
+            qt6-qtcompat
+        do
+          sudo port -Nkv install $portname +universal
+        done
+    - name: Upload package artifact
+      uses: actions/upload-artifact@v3.1.2
+      with:
+        name: sqlitestudio-${{ env.SQLITESTUDIO_VERSION }}.dmg
+        path: ${{ env.PKG_PATH }}/qt6-qt*/*.tbz2
+    - name: Save final MacPorts packages cache
+      uses: actions/cache/save@v3
+      with:
+        path: ${{ env.PKG_PATH }}
+        key: macports-pkgs-${{ matrix.variant }}-${{ github.sha }}
+    - name: Save final ccache
+      uses: actions/cache/save@v3
+      with:
+        path: ~/.macports-ci-ccache
+        key: ccache-macports-${{ matrix.variant }}-${{ github.sha }}
