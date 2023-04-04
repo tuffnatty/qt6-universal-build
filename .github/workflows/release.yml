@@ -64,18 +64,18 @@ jobs:
     #- name: Install graphite2 deps
     #  run: |
     #    sudo port -Nkv install cmake py310-fonttools
+    - name: Install graphite2
+      run: |
+        cd macports/graphics/graphite2
+        port -Nkv install +universal
+    #- name: Install graphite2
+    #  run: |
+    #    sudo port -Nkv install graphite2 +universal || true
     - name: Save MacPorts packages cache
       uses: actions/cache/save@v3
       with:
         path: ${{ env.PKG_PATH }}
         key: macports-pkgs-${{ matrix.variant }}-${{ github.sha }}-1
-    - name: Install graphite2
-      run: |
-        cd macports/graphics/graphite2
-        port -Nkv install +universal || true
-    #- name: Install graphite2
-    #  run: |
-    #    sudo port -Nkv install graphite2 +universal || true
     - name: Save ccache
       uses: actions/cache/save@v3
       with:
@@ -90,18 +90,19 @@ jobs:
             qt6-qttools \
             qt6-qtcompat
         do
-          sudo port -Nkv install subport=$portname +universal
+          sudo port -Nkv install subport=$portname +universal || break
+          #sudo port -Nkv install subport=$portname +universal
         done
-    - name: Upload package artifact
-      uses: actions/upload-artifact@v3.1.2
-      with:
-        name: sqlitestudio-${{ env.SQLITESTUDIO_VERSION }}.dmg
-        path: ${{ env.PKG_PATH }}/qt6-qt*/*.tbz2
     - name: Save final MacPorts packages cache
       uses: actions/cache/save@v3
       with:
         path: ${{ env.PKG_PATH }}
         key: macports-pkgs-${{ matrix.variant }}-${{ github.sha }}
+    - name: Upload package artifact
+      uses: actions/upload-artifact@v3.1.2
+      with:
+        name: sqlitestudio-${{ env.SQLITESTUDIO_VERSION }}.dmg
+        path: ${{ env.PKG_PATH }}/qt6-qt*/*.tbz2
     - name: Save final ccache
       uses: actions/cache/save@v3
       with:
