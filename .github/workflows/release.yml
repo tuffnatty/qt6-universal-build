@@ -47,7 +47,7 @@ jobs:
 
         # graphite2
         cp -rp $PORTS_SRC/graphics/graphite2 graphics/
-        curl -L https://github.com/macports/macports-ports/commit/62b052345c3d0c9453e1e43291f1748f76d3468d.diff \
+        curl -L https://github.com/macports/macports-ports/commit/9b6aa0c40aa62f84094f2282dd5f8721455581a8.diff \
             | patch -p1
 
         portindex
