@@ -38,12 +38,14 @@ jobs:
         cd macports
         PORTS_SRC=$(echo /opt/local/var/macports/sources/*/macports/release/tarballs/ports)
 
-        # https://github.com/macports/macports-ports/pull/16735
+        cp -rp $PORTS_SRC/aqua/qt5 aqua/
+
+        ## https://github.com/macports/macports-ports/pull/16735
         cp -rp $PORTS_SRC/aqua/qt6 aqua/
-        curl -L https://github.com/macports/macports-ports/commit/62f0020772f9f68664e73e03b4355262b6024664.diff \
-            | patch -p1
-        curl -L https://github.com/macports/macports-ports/commit/4b90c16bb66f0c43a2a57f342bc959f3e8422c00.diff \
-            | patch -p1
+        #curl -L https://github.com/macports/macports-ports/commit/62f0020772f9f68664e73e03b4355262b6024664.diff \
+        #    | patch -p1
+        #curl -L https://github.com/macports/macports-ports/commit/4b90c16bb66f0c43a2a57f342bc959f3e8422c00.diff \
+        #    | patch -p1
 
         # graphite2
         cp -rp $PORTS_SRC/graphics/graphite2 graphics/
@@ -81,6 +83,18 @@ jobs:
       with:
         path: ~/.ccache
         key: ccache-macports-${{ matrix.variant }}-${{ github.sha }}-1
+    - name: Install Qt
+      run: |
+        cd macports/aqua/qt5
+        for portname in \
+            qt5-qtbase \
+            qt5-qtscript \
+            qt5-qttools \
+            qt5-qtcompat
+        do
+          sudo port -Nkv install subport=$portname +universal || break
+          #sudo port -Nkv install subport=$portname +universal
+        done
     - name: Install Qt
       run: |
         cd macports/aqua/qt6
