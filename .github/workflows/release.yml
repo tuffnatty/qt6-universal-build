@@ -68,8 +68,13 @@ jobs:
     #    sudo port -Nkv install cmake py310-fonttools
     - name: Install graphite2
       run: |
-        cd macports/graphics/graphite2
+        tee -a /opt/local/etc/macports.conf <<EOF
+        startupitem_install no  # for dbus
+        EOF
+
         port selfupdate
+
+        cd macports/graphics/graphite2
         port -Nkv install +universal
     #- name: Install graphite2
     #  run: |
