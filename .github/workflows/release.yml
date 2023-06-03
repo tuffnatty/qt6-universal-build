@@ -23,6 +23,12 @@ jobs:
         path: ${{ env.PKG_PATH }}
         key: macports-pkgs-${{ matrix.variant }}-${{ github.sha }}
         restore-keys: macports-pkgs-${{ matrix.variant }}-
+    - name: Restore ccache
+      uses: actions/cache/restore@v3
+      with:
+        path: ~/.ccache
+        key: ccache-${{ matrix.variant }}-${{ github.sha }}
+        restore-keys: ccache-${{ matrix.variant }}-
     #- name: Restore ccache
     #  uses: actions/cache/restore@v3
     #  with:
@@ -57,7 +63,7 @@ jobs:
         #source ./macports-ci localports macports
     - name: Install graphite2 deps
       run: |
-        port -Nkv install cmake py310-fonttools
+        port -Nkv install cmake py310-fonttools ccache
     - name: Save ccache
       uses: actions/cache/save@v3
       with:
@@ -68,6 +74,9 @@ jobs:
         set -x
         tee -a /opt/local/etc/macports/macports.conf <<EOF
         startupitem_install no
+        configureccache yes
+        ccache_dir $HOME/.ccache
+        ccache_size 1G
         EOF
 
         port selfupdate
@@ -94,7 +103,24 @@ jobs:
       with:
         path: ~/.ccache
         key: ccache-macports-${{ matrix.variant }}-${{ github.sha }}-1
-    - name: Install Qt
+    - name: Install Qt5 deps
+      run: |
+        set -x
+        cd macports/aqua/qt5
+        for portname in \
+            qt5-qtbase \
+            qt5-qtscript \
+            qt5-qttools \
+            qt5-qtcompat
+        do
+          sudo port -Nkv install subport=$portname $_variant || break
+        done
+    - name: Save ccache
+      uses: actions/cache/save@v3
+      with:
+        path: ~/.ccache
+        key: ccache-macports-${{ matrix.variant }}-${{ github.sha }}-2
+    - name: Install Qt5
       run: |
         set -x
         cd macports/aqua/qt5
@@ -107,18 +133,18 @@ jobs:
           sudo port -Nkv install subport=$portname +universal || break
           #sudo port -Nkv install subport=$portname +universal
         done
-    - name: Install Qt
-      run: |
-        cd macports/aqua/qt6
-        for portname in \
-            qt6-qtbase \
-            qt6-qtscript \
-            qt6-qttools \
-            qt6-qtcompat
-        do
-          sudo port -Nkv install subport=$portname +universal || break
-          #sudo port -Nkv install subport=$portname +universal
-        done
+    #- name: Install Qt
+    #  run: |
+    #    cd macports/aqua/qt6
+    #    for portname in \
+    #        qt6-qtbase \
+    #        qt6-qtscript \
+    #        qt6-qttools \
+    #        qt6-qtcompat
+    #    do
+    #      sudo port -Nkv install subport=$portname +universal || break
+    #      #sudo port -Nkv install subport=$portname +universal
+    #    done
     - name: Save final MacPorts packages cache
       uses: actions/cache/save@v3
       with:
