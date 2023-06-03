@@ -73,6 +73,7 @@ jobs:
         EOF
 
         port selfupdate
+        port install dbus +universal || sudo port install dbus +universal
 
         cd macports/graphics/graphite2
         port -Nkv install +universal
