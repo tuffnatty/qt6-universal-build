@@ -63,19 +63,22 @@ jobs:
       with:
         path: ~/.ccache
         key: ccache-macports-${{ matrix.variant }}-${{ github.sha }}-0
-    #- name: Install graphite2 deps
-    #  run: |
-    #    sudo port -Nkv install cmake py310-fonttools
-    - name: Install graphite2
+    - name: Macports preparation
       run: |
+        set -x
         tee -a /opt/local/etc/macports/macports.conf <<EOF
         startupitem_install no
         EOF
 
         port selfupdate
-        port install dbus +universal || sudo port install dbus +universal
-        port upgrade libxml2
-
+        port install -Nkv dbus +universal || sudo port install dbus +universal
+        port install -Nkv libxml2 +universal
+        port install -Nkv zlib +universal
+    #- name: Install graphite2 deps
+    #  run: |
+    #    sudo port -Nkv install cmake py310-fonttools
+    - name: Install graphite2
+      run: |
         cd macports/graphics/graphite2
         port -Nkv install +universal
     #- name: Install graphite2
@@ -93,6 +96,7 @@ jobs:
         key: ccache-macports-${{ matrix.variant }}-${{ github.sha }}-1
     - name: Install Qt
       run: |
+        set -x
         cd macports/aqua/qt5
         for portname in \
             qt5-qtbase \
