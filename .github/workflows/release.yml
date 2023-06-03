@@ -74,6 +74,7 @@ jobs:
 
         port selfupdate
         port install dbus +universal || sudo port install dbus +universal
+        port upgrade libxml2
 
         cd macports/graphics/graphite2
         port -Nkv install +universal
