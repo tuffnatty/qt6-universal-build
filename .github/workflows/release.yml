@@ -69,7 +69,7 @@ jobs:
     - name: Install graphite2
       run: |
         tee -a /opt/local/etc/macports/macports.conf <<EOF
-        startupitem_install no  # for dbus
+        startupitem_install no
         EOF
 
         port selfupdate
