@@ -81,6 +81,7 @@ jobs:
         EOF
 
         sudo port selfupdate
+        sudo rm -fr /opt/local/var/macports/software/dbus/
         sudo port install -Nv dbus +universal
         sudo port install -Nkv libxml2 +universal
         sudo port install -Nkv zlib +universal
