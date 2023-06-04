@@ -121,8 +121,8 @@ jobs:
       run: |
         set -x
         cd macports/aqua/qt5
-        deps="$(for portname in $qt5_subports; do sudo port info --line --depends subport=$portname; done | tr '\t,' $'\n' | sort -u | grep -v '^qt5-')"
-        sudo port -Nkv install $deps
+        deps="$(for _p in $qt5_subports; do sudo port info --line --depends subport=$_p; done | tr '\t,' $'\n' | sort -u | grep -vE '^gettext|^qt5-|^xz')"
+        sudo port -Nv install $deps
     - run: env CCACHE_DIR=$GITHUB_WORKSPACE/.ccache sudo ccache -s
     - name: Save ccache
       uses: actions/cache/save@v3
@@ -159,8 +159,8 @@ jobs:
     - name: Upload package artifact
       uses: actions/upload-artifact@v3.1.2
       with:
-        name: sqlitestudio-${{ env.SQLITESTUDIO_VERSION }}.dmg
-        path: ${{ env.PKG_PATH }}/qt6-qt*/*.tbz2
+        name: qt5-packages-darwin_20.arm64-x86_64.zip
+        path: ${{ env.PKG_PATH }}/qt5-qt*/*.tbz2
     - name: Save final ccache
       uses: actions/cache/save@v3
       with:
