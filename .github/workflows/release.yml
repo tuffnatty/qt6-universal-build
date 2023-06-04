@@ -56,7 +56,8 @@ jobs:
         sudo port selfupdate
         sudo port uninstall -Nv dbus
         sudo port clean -Nv --dist dbus
-        sudo port install -Nsv dbus +universal
+        sudo port install -Nv xz gettext +universal
+        sudo port install -Nv dbus +universal || sudo port install -Nsv dbus +universal
         sudo port install -Nkv libxml2 +universal
         sudo port install -Nkv zlib +universal
     - run: env CCACHE_DIR=$GITHUB_WORKSPACE/.ccache sudo ccache -s
@@ -116,10 +117,9 @@ jobs:
         for portname in \
             qt5-qtbase \
             qt5-qtscript \
-            qt5-qttools \
-            qt5-qtcompat
+            qt5-qttools
         do
-          sudo port -Nkv clean subport=$portname || break
+          sudo port -Nkv clean subport=$portname
           sudo port -Nkv install subport=$portname || break
           env CCACHE_DIR=$GITHUB_WORKSPACE/.ccache sudo ccache -s
         done
@@ -136,9 +136,9 @@ jobs:
         for portname in \
             qt5-qtbase \
             qt5-qtscript \
-            qt5-qttools \
-            qt5-qtcompat
+            qt5-qttools
         do
+          sudo port -Nkv clean subport=$portname
           sudo port -Nkv install subport=$portname +universal || break
           env CCACHE_DIR=$GITHUB_WORKSPACE/.ccache sudo ccache -s
           #sudo port -Nkv install subport=$portname +universal
