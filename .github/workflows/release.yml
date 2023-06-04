@@ -63,7 +63,7 @@ jobs:
         #source ./macports-ci localports macports
     - name: Install graphite2 deps
       run: |
-        port -Nkv install cmake py310-fonttools ccache
+        sudo port -Nkv install cmake py310-fonttools ccache
     - run: env CCACHE_DIR=.ccache sudo ccache -s
     - name: Save ccache
       uses: actions/cache/save@v3
@@ -80,17 +80,17 @@ jobs:
         ccache_size 1G
         EOF
 
-        port selfupdate
-        port install -Nkv dbus +universal || sudo port install dbus +universal
-        port install -Nkv libxml2 +universal
-        port install -Nkv zlib +universal
+        sudo port selfupdate
+        sudo port install dbus +universal
+        sudo port install -Nkv libxml2 +universal
+        sudo port install -Nkv zlib +universal
     #- name: Install graphite2 deps
     #  run: |
     #    sudo port -Nkv install cmake py310-fonttools
     - name: Install graphite2
       run: |
         cd macports/graphics/graphite2
-        port -Nkv install +universal
+        sudo port -Nkv install +universal
     #- name: Install graphite2
     #  run: |
     #    sudo port -Nkv install graphite2 +universal || true
