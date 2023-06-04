@@ -81,6 +81,7 @@ jobs:
         EOF
 
         sudo port selfupdate
+        sudo port clean -Nv --dist dbus
         sudo port install -Nsv dbus +universal
         sudo port install -Nkv libxml2 +universal
         sudo port install -Nkv zlib +universal
