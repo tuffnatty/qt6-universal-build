@@ -40,7 +40,7 @@ jobs:
     #    source ./macports-ci ccache
     - name: Install patched Portfiles
       run: |
-        mkdir -p macports/aqua macports/graphics
+        mkdir -p .ccache macports/aqua macports/graphics
         cd macports
         PORTS_SRC=$(echo /opt/local/var/macports/sources/*/macports/release/tarballs/ports)
 
@@ -81,8 +81,7 @@ jobs:
         EOF
 
         sudo port selfupdate
-        sudo rm -fr /opt/local/var/macports/software/dbus/
-        sudo port install -Nv dbus +universal
+        sudo port install -Nsv dbus +universal
         sudo port install -Nkv libxml2 +universal
         sudo port install -Nkv zlib +universal
     #- name: Install graphite2 deps
