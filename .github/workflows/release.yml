@@ -59,7 +59,7 @@ jobs:
         sudo port install -Nsv dbus +universal
         sudo port install -Nkv libxml2 +universal
         sudo port install -Nkv zlib +universal
-    - run: env CCACHE_DIR=.ccache sudo ccache -s
+    - run: env CCACHE_DIR=$GITHUB_WORKSPACE/.ccache sudo ccache -s
     - name: Save ccache
       uses: actions/cache/save@v3
       with:
@@ -103,7 +103,7 @@ jobs:
       with:
         path: ${{ env.PKG_PATH }}
         key: macports-pkgs-${{ matrix.variant }}-${{ github.sha }}-1
-    - run: env CCACHE_DIR=.ccache sudo ccache -s
+    - run: env CCACHE_DIR=$GITHUB_WORKSPACE/.ccache sudo ccache -s
     - name: Save ccache
       uses: actions/cache/save@v3
       with:
@@ -119,10 +119,11 @@ jobs:
             qt5-qttools \
             qt5-qtcompat
         do
-          sudo port -Nkv install subport=$portname $_variant || break
-          env CCACHE_DIR=.ccache sudo ccache -s
+          sudo port -Nkv clean subport=$portname || break
+          sudo port -Nkv install subport=$portname || break
+          env CCACHE_DIR=$GITHUB_WORKSPACE/.ccache sudo ccache -s
         done
-    - run: env CCACHE_DIR=.ccache sudo ccache -s
+    - run: env CCACHE_DIR=$GITHUB_WORKSPACE/.ccache sudo ccache -s
     - name: Save ccache
       uses: actions/cache/save@v3
       with:
@@ -139,7 +140,7 @@ jobs:
             qt5-qtcompat
         do
           sudo port -Nkv install subport=$portname +universal || break
-          env CCACHE_DIR=.ccache sudo ccache -s
+          env CCACHE_DIR=$GITHUB_WORKSPACE/.ccache sudo ccache -s
           #sudo port -Nkv install subport=$portname +universal
         done
     #- name: Install Qt
