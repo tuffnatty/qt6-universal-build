@@ -4,8 +4,8 @@ name: MacOSX 11+ universal release build
 on:
   workflow_dispatch:
     inputs:
-  schedule:
-    - cron: '0 3 * * 1' # run at 3 AM UTC every Monday
+  #schedule:
+  #  - cron: '0 3 * * 1' # run at 3 AM UTC every Monday
   repository_dispatch:
     types: [release]
 jobs:
@@ -26,7 +26,7 @@ jobs:
     - name: Restore ccache
       uses: actions/cache/restore@v3
       with:
-        path: ~/.ccache
+        path: .ccache
         key: ccache-${{ matrix.variant }}-${{ github.sha }}
         restore-keys: ccache-${{ matrix.variant }}-
     #- name: Restore ccache
@@ -64,18 +64,19 @@ jobs:
     - name: Install graphite2 deps
       run: |
         port -Nkv install cmake py310-fonttools ccache
+    - run: env CCACHE_DIR=.ccache sudo ccache -s
     - name: Save ccache
       uses: actions/cache/save@v3
       with:
-        path: ~/.ccache
-        key: ccache-macports-${{ matrix.variant }}-${{ github.sha }}-0
+        path: .ccache
+        key: ccache-${{ matrix.variant }}-${{ github.sha }}-0
     - name: Macports preparation
       run: |
         set -x
         tee -a /opt/local/etc/macports/macports.conf <<EOF
         startupitem_install no
         configureccache yes
-        ccache_dir $HOME/.ccache
+        ccache_dir $GITHUB_WORKSPACE/.ccache
         ccache_size 1G
         EOF
 
@@ -98,11 +99,12 @@ jobs:
       with:
         path: ${{ env.PKG_PATH }}
         key: macports-pkgs-${{ matrix.variant }}-${{ github.sha }}-1
+    - run: env CCACHE_DIR=.ccache sudo ccache -s
     - name: Save ccache
       uses: actions/cache/save@v3
       with:
-        path: ~/.ccache
-        key: ccache-macports-${{ matrix.variant }}-${{ github.sha }}-1
+        path: .ccache
+        key: ccache-${{ matrix.variant }}-${{ github.sha }}-1
     - name: Install Qt5 deps
       run: |
         set -x
@@ -114,12 +116,14 @@ jobs:
             qt5-qtcompat
         do
           sudo port -Nkv install subport=$portname $_variant || break
+          env CCACHE_DIR=.ccache sudo ccache -s
         done
+    - run: env CCACHE_DIR=.ccache sudo ccache -s
     - name: Save ccache
       uses: actions/cache/save@v3
       with:
-        path: ~/.ccache
-        key: ccache-macports-${{ matrix.variant }}-${{ github.sha }}-2
+        path: .ccache
+        key: ccache-${{ matrix.variant }}-${{ github.sha }}-2
     - name: Install Qt5
       run: |
         set -x
@@ -131,6 +135,7 @@ jobs:
             qt5-qtcompat
         do
           sudo port -Nkv install subport=$portname +universal || break
+          env CCACHE_DIR=.ccache sudo ccache -s
           #sudo port -Nkv install subport=$portname +universal
         done
     #- name: Install Qt
@@ -158,5 +163,5 @@ jobs:
     - name: Save final ccache
       uses: actions/cache/save@v3
       with:
-        path: ~/.ccache
-        key: ccache-macports-${{ matrix.variant }}-${{ github.sha }}
+        path: .ccache
+        key: ccache-${{ matrix.variant }}-${{ github.sha }}
