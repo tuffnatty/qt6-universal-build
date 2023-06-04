@@ -38,6 +38,32 @@ jobs:
     #- name: Configure ccache
     #  run: |
     #    source ./macports-ci ccache
+    - name: Install graphite2 deps
+      run: |
+        sudo port -Nkv install cmake py310-fonttools
+    - run: env CCACHE_DIR=.ccache sudo ccache -s
+    - name: Save ccache
+      uses: actions/cache/save@v3
+      with:
+        path: .ccache
+        key: ccache-${{ matrix.variant }}-${{ github.sha }}-0
+    - name: Macports preparation
+      run: |
+        set -x
+        sudo port install ccache
+        tee -a /opt/local/etc/macports/macports.conf <<EOF
+        startupitem_install no
+        configureccache yes
+        ccache_dir $GITHUB_WORKSPACE/.ccache
+        ccache_size 1G
+        EOF
+
+        sudo port selfupdate
+        sudo port uninstall -Nv dbus
+        sudo port clean -Nv --dist dbus
+        sudo port install -Nsv dbus +universal
+        sudo port install -Nkv libxml2 +universal
+        sudo port install -Nkv zlib +universal
     - name: Install patched Portfiles
       run: |
         mkdir -p .ccache macports/aqua macports/graphics
@@ -61,31 +87,6 @@ jobs:
         portindex
         cd ..
         #source ./macports-ci localports macports
-    - name: Install graphite2 deps
-      run: |
-        sudo port -Nkv install cmake py310-fonttools ccache
-    - run: env CCACHE_DIR=.ccache sudo ccache -s
-    - name: Save ccache
-      uses: actions/cache/save@v3
-      with:
-        path: .ccache
-        key: ccache-${{ matrix.variant }}-${{ github.sha }}-0
-    - name: Macports preparation
-      run: |
-        set -x
-        tee -a /opt/local/etc/macports/macports.conf <<EOF
-        startupitem_install no
-        configureccache yes
-        ccache_dir $GITHUB_WORKSPACE/.ccache
-        ccache_size 1G
-        EOF
-
-        sudo port selfupdate
-        sudo port uninstall -Nv dbus
-        sudo port clean -Nv --dist dbus
-        sudo port install -Nsv dbus +universal
-        sudo port install -Nkv libxml2 +universal
-        sudo port install -Nkv zlib +universal
     #- name: Install graphite2 deps
     #  run: |
     #    sudo port -Nkv install cmake py310-fonttools
