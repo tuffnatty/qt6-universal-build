@@ -1,5 +1,12 @@
 env:
   PKG_PATH: /opt/local/var/macports/software
+  qt5_subports: >
+    qt5-qtbase
+    qt5-qtdeclarative
+    qt5-qtimageformats
+    qt5-qtmacextras
+    qt5-qtscript
+    qt5-qttools
 name: MacOSX 11+ universal release build
 on:
   workflow_dispatch:
@@ -114,15 +121,8 @@ jobs:
       run: |
         set -x
         cd macports/aqua/qt5
-        for portname in \
-            qt5-qtbase \
-            qt5-qtscript \
-            qt5-qttools
-        do
-          sudo port -Nkv clean subport=$portname
-          sudo port -Nkv install subport=$portname || break
-          env CCACHE_DIR=$GITHUB_WORKSPACE/.ccache sudo ccache -s
-        done
+        deps="$(for portname in $qt5_subports; do sudo port info --line --depends subport=$portname; done | tr '\t,' $'\n' | sort -u | grep -v '^qt5-')"
+        sudo port -Nkv install $deps
     - run: env CCACHE_DIR=$GITHUB_WORKSPACE/.ccache sudo ccache -s
     - name: Save ccache
       uses: actions/cache/save@v3
@@ -133,11 +133,7 @@ jobs:
       run: |
         set -x
         cd macports/aqua/qt5
-        for portname in \
-            qt5-qtbase \
-            qt5-qtscript \
-            qt5-qttools
-        do
+        for portname in $qt5_subports; do
           sudo port -Nkv clean subport=$portname
           sudo port -Nkv install subport=$portname +universal || break
           env CCACHE_DIR=$GITHUB_WORKSPACE/.ccache sudo ccache -s
