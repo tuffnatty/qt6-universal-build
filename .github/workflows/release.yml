@@ -45,12 +45,10 @@ jobs:
     #- name: Configure ccache
     #  run: |
     #    source ./macports-ci ccache
-    - name: Install graphite2 deps
-      run: |
-        sudo port -Nkv install cmake py310-fonttools
     - name: Macports preparation
       run: |
         set -x
+        sudo port selfupdate
         sudo port install ccache
         mkdir -p .ccache
         tee -a /opt/local/etc/macports/macports.conf <<EOF
@@ -60,7 +58,6 @@ jobs:
         ccache_size 1G
         EOF
 
-        sudo port selfupdate
         #sudo port uninstall -Nv dbus
         #sudo port clean -Nv --dist dbus
         #sudo port install -Nv xz +universal gettext +universal
