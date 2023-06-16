@@ -61,12 +61,12 @@ jobs:
         EOF
 
         sudo port selfupdate
-        sudo port uninstall -Nv dbus
-        sudo port clean -Nv --dist dbus
-        sudo port install -Nv xz gettext +universal
-        sudo port install -Nv dbus +universal || sudo port install -Nsv dbus +universal
-        sudo port install -Nkv libxml2 +universal
-        sudo port install -Nkv zlib +universal
+        #sudo port uninstall -Nv dbus
+        #sudo port clean -Nv --dist dbus
+        #sudo port install -Nv xz +universal gettext +universal
+        #sudo port install -Nv dbus +universal || sudo port install -Nsv dbus +universal
+        #sudo port install -Nv libxml2 +universal
+        #sudo port install -Nv zlib +universal
     - run: env CCACHE_DIR=$GITHUB_WORKSPACE/.ccache sudo ccache -s
     - name: Save ccache
       uses: actions/cache/save@v3
@@ -90,8 +90,21 @@ jobs:
 
         # graphite2
         cp -rp $PORTS_SRC/graphics/graphite2 graphics/
-        curl -L https://github.com/macports/macports-ports/commit/9b6aa0c40aa62f84094f2282dd5f8721455581a8.diff \
-            | patch -p1
+        patch -p1 <<'EOF'
+        diff -ru a/graphics/graphite2/Portfile b/graphics/graphite2/Portfile
+        --- a/graphics/graphite2/Portfile	2023-06-01 17:29:28.000000000 +0200
+        +++ b/graphics/graphite2/Portfile	2023-06-16 22:58:10.000000000 +0200
+        @@ -3,6 +3,7 @@
+         PortSystem          1.0
+         PortGroup           cmake 1.1
+         PortGroup           github 1.0
+        +PortGroup           muniversal 1.1
+         
+         github.setup        silnrsi graphite 1.3.14
+         revision            0
+        EOF
+        #curl -L https://github.com/macports/macports-ports/commit/9b6aa0c40aa62f84094f2282dd5f8721455581a8.diff \
+        #    | patch -p1
 
         portindex
         cd ..
