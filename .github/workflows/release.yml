@@ -19,7 +19,7 @@ jobs:
   build:
     runs-on: macos-11
     steps:
-    - uses: melusina-org/gha-install-macports@v1
+    - uses: melusina-org/setup-macports@v1
     #- name: Install MacPorts
     #  run: |
     #    curl -LO https://raw.githubusercontent.com/tuffnatty/macports-ci/hash-r-after-homebrew-removal/macports-ci
